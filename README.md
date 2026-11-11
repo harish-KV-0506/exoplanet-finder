@@ -1,5 +1,7 @@
 # Exoplanet Finder
 
+[Open the live web app](https://harish-kv-0506-exoplanet-finder-app-ti1m2d.streamlit.app/)
+
 A compact 1D convolutional neural network (CNN) baseline for classifying
 NASA Kepler light curves. It learns patterns in stellar brightness over time
 and predicts whether a labeled curve belongs to the planet-candidate class.
