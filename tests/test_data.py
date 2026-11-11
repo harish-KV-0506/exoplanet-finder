@@ -1,3 +1,5 @@
+from io import BytesIO
+
 import numpy as np
 import pandas as pd
 import pytest
@@ -51,3 +53,12 @@ def test_load_unlabeled_curves_rejects_label_column(tmp_path):
 
     with pytest.raises(ValueError, match="Remove the LABEL column"):
         load_unlabeled_curves(path)
+
+
+def test_load_labeled_curves_accepts_uploaded_csv_stream():
+    csv = BytesIO(b"LABEL,flux_1,flux_2\n1,10,12\n2,20,18\n")
+
+    features, targets = load_labeled_curves(csv)
+
+    assert features.shape == (2, 2, 1)
+    np.testing.assert_array_equal(targets, [0, 1])

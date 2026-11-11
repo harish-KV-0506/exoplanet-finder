@@ -58,6 +58,32 @@ exoplanet-predict --model artifacts/exoplanet_cnn.keras --input path\to\light_cu
 The command prints the probability of the planet-candidate class for each row.
 Predictions are model outputs and need independent scientific validation.
 
+## Run the web app
+
+The browser app trains a real CNN from the labeled CSV you upload; it does not
+show sample or precomputed predictions. You can optionally upload a separate
+labeled CSV for held-out evaluation, then score unlabeled curves and download
+the predictions or trained model.
+
+After installing the project as described above, start the app:
+
+```powershell
+streamlit run app.py
+```
+
+Streamlit opens the app in your browser. Upload your own CSVs using the formats
+described in the app. Training happens on the machine running Streamlit.
+
+### Publish the web app
+
+Deploy the GitHub repository to
+[Streamlit Community Cloud](https://share.streamlit.io/deploy?repository=harish-KV-0506%2Fexoplanet-finder&branch=main&mainModule=app.py).
+Sign in, confirm the `main` branch and `app.py`, then deploy. The service
+installs dependencies from `requirements.txt`. No model or sample dataset is
+bundled; users supply the labeled CSVs in the app. When hosted, uploaded data
+is processed by the hosting service, so only upload data you are authorized to
+share with that service.
+
 ## Tests
 
 ```powershell
