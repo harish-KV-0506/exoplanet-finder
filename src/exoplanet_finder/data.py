@@ -51,20 +51,37 @@ def normalize_light_curves(flux: np.ndarray) -> np.ndarray:
     return ((values - means) / deviations)[..., np.newaxis]
 
 
-def load_labeled_curves(csv_path: CsvSource) -> tuple[np.ndarray, np.ndarray]:
-    """Load a Kepler CSV with LABEL values 1 (non-candidate) or 2 (candidate)."""
+def load_labeled_curves(
+    csv_path: CsvSource,
+    label_mode: str = "kepler",
+) -> tuple[np.ndarray, np.ndarray]:
+    """Load labeled curves; targets are 1 for planet and 0 for comparison class."""
     source_name = _source_name(csv_path)
     frame = pd.read_csv(csv_path)
     if "LABEL" not in frame.columns:
         raise ValueError(f"Expected a LABEL column in {source_name}.")
 
     labels = frame.pop("LABEL").to_numpy()
-    if not np.isin(labels, [1, 2]).all():
-        raise ValueError(f"LABEL values in {source_name} must be 1 or 2.")
+    if label_mode == "kepler":
+        if not np.isin(labels, [1, 2]).all():
+            raise ValueError(f"LABEL values in {source_name} must be 1 or 2.")
+        targets = (labels == 2).astype(np.int32)
+    elif label_mode == "planet_vs_eb":
+        normalized_labels = np.array(
+            [str(label).strip().casefold().replace(" ", "_") for label in labels]
+        )
+        allowed_labels = {"planet", "eclipsing_binary"}
+        if not np.isin(normalized_labels, list(allowed_labels)).all():
+            raise ValueError(
+                f"LABEL values in {source_name} must be 'planet' or "
+                "'eclipsing_binary' for this training mode."
+            )
+        targets = (normalized_labels == "planet").astype(np.int32)
+    else:
+        raise ValueError(f"Unknown label mode: {label_mode}.")
 
     flux = _flux_values(frame, source_name)
     features = normalize_light_curves(flux)
-    targets = (labels == 2).astype(np.int32)
     return features, targets
 
 

@@ -3,8 +3,11 @@
 [Open the live web app](https://harish-kv-0506-exoplanet-finder-app-ti1m2d.streamlit.app/)
 
 A compact 1D convolutional neural network (CNN) baseline for classifying
-NASA Kepler light curves. It learns patterns in stellar brightness over time
-and predicts whether a labeled curve belongs to the planet-candidate class.
+NASA Kepler light curves. The web app supports both Kepler candidate vs.
+non-candidate data and an explicit planet-transit vs. eclipsing-binary task.
+The latter requires event-level examples whose labels identify those two
+classes; the broad non-candidate label in the standard Kepler CSV does not
+identify eclipsing binaries.
 
 ## Dataset
 
@@ -17,9 +20,15 @@ in a local `data/` directory. The CSVs are intentionally not committed to this
 repository.
 
 In this dataset, `LABEL=2` is the planet-candidate class and `LABEL=1` is the
-non-candidate class. The latter is a broad comparison class; it should not be
-interpreted as a specifically curated eclipsing-binary set. The model is a
-learning project, not a validated scientific discovery system.
+non-candidate class. It is useful for the candidate-vs-non-candidate task, but
+not for claiming a planet-vs-eclipsing-binary classification. For the latter,
+prepare a separately labeled set of equal-length, event-centered transit and
+eclipse flux windows from a documented source such as the NASA
+[Exoplanet Archive](https://exoplanetarchive.ipac.caltech.edu/) and
+[MAST Kepler archive](https://mast.stsci.edu/portal/Mashup/Clients/Mast/Portal.html).
+Keep the class labels tied to the source catalog's dispositions and document
+the selection process. The model is a learning project, not a validated
+scientific discovery system.
 
 ## Setup
 
@@ -62,19 +71,32 @@ Predictions are model outputs and need independent scientific validation.
 
 ## Run the web app
 
-The browser app trains a real CNN from the labeled CSV you upload; it does not
-show sample or precomputed predictions. You can optionally upload a separate
-labeled CSV for held-out evaluation, then score unlabeled curves and download
-the predictions or trained model.
+The browser app trains a CNN from the labeled CSV you upload; it does not show
+sample or precomputed predictions. Select one of two objectives:
 
-After installing the project as described above, start the app:
+- **Kepler candidate vs non-candidate:** accepts `LABEL=1` and `LABEL=2` from
+  the Kepler-labelled dataset. This does not specifically identify eclipsing
+  binaries.
+- **Planet transit vs eclipsing binary:** requires explicit `LABEL` values
+  `planet` and `eclipsing_binary`. Use equal-length, event-centered windows,
+  rather than treating an unlabeled/broad false-positive class as binaries.
+
+Each row is one curve/window; remaining columns must be numeric flux samples.
+The prediction CSV has the same flux columns without `LABEL`. For better
+evaluation, upload a separate labeled dataset that includes both classes.
+After training, score unlabeled curves and download predictions or the trained
+model.
+
+Run locally:
 
 ```powershell
 streamlit run app.py
 ```
 
 Streamlit opens the app in your browser. Upload your own CSVs using the formats
-described in the app. Training happens on the machine running Streamlit.
+described in the app. Training happens on the machine running Streamlit. The
+interface uses animated motion effects and honors reduced-motion browser
+preferences.
 
 ### Publish the web app
 

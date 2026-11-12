@@ -62,3 +62,21 @@ def test_load_labeled_curves_accepts_uploaded_csv_stream():
 
     assert features.shape == (2, 2, 1)
     np.testing.assert_array_equal(targets, [0, 1])
+
+
+def test_load_labeled_curves_maps_explicit_eclipsing_binary_labels():
+    csv = BytesIO(
+        b"LABEL,flux_1,flux_2\nplanet,10,12\neclipsing_binary,20,18\n"
+    )
+
+    features, targets = load_labeled_curves(csv, label_mode="planet_vs_eb")
+
+    assert features.shape == (2, 2, 1)
+    np.testing.assert_array_equal(targets, [1, 0])
+
+
+def test_planet_vs_eb_mode_rejects_generic_non_candidate_labels():
+    csv = BytesIO(b"LABEL,flux_1,flux_2\n2,10,12\n1,20,18\n")
+
+    with pytest.raises(ValueError, match="planet.*eclipsing_binary"):
+        load_labeled_curves(csv, label_mode="planet_vs_eb")
